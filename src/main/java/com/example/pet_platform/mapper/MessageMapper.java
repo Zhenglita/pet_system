@@ -1,0 +1,10 @@
+package com.example.pet_platform.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.pet_platform.entity.Message;
+import com.example.pet_platform.entity.OrderBooks;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface MessageMapper extends BaseMapper<Message> {
+}

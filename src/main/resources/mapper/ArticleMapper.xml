@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.pet_platform.mapper.ArticleMapper">
+    <select id="findAllByUserId" resultType="com.example.pet_platform.entity.Article" parameterType="int">
+        select pet_article.* from pet_article
+        left join pet_user
+        on pet_article.uid=pet_user.uid
+        where  pet_article.uid=#{userId}
+    </select>
+    <select id="findAllByAbleAndUserId" resultType="com.example.pet_platform.entity.Article" >
+        select pet_article.* from pet_article
+        where  pet_article.enable=#{enable} and pet_article.uid=#{userId}
+    </select>
+    <select id="findAllByAble" resultType="com.example.pet_platform.entity.Article" >
+        select pet_article.* from pet_article
+        where  pet_article.enable=#{enable}
+    </select>
+</mapper>
