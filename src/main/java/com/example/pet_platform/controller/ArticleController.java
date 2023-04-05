@@ -49,14 +49,26 @@ public class ArticleController {
         String token = request.getHeader("Authorization");
         DecodedJWT verify = JWTUtils.verify(token);
         String userid = verify.getClaim("userid").asString();
+        //判断是否关注与否
         QueryWrapper<Follow> qw=new QueryWrapper<>();
         qw.eq("b_uid",byId.getUid());
         qw.eq("f_uid",Integer.parseInt(userid));
         List<Follow> list = followService.list(qw);
+        //获取该文章作者的头像
+        Article article = articleService.getById(id);
+        QueryWrapper<User> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("uid",article.getUid());
+        User one = userService.getOne(queryWrapper);
+        article.setUimage(one.getAvatar());
+        //获取审批该文章的管理员信息
+        QueryWrapper<User> qw_admin=new QueryWrapper<>();
+        qw_admin.eq("uid",article.getEnable_uid());
+        User admin = userService.getOne(qw_admin);
+        article.setEnable_user(admin);
         if (list.size()>0){
-            return  new R(true,articleService.getById(id),"已关注");
+            return  new R(true,article,"已关注");
         }
-        return  new R(true,articleService.getById(id),"未关注");
+        return  new R(true,article,"未关注");
     }
 //    @GetMapping("/{currentPage}/{pageSize}")
 //    public R getPage(@PathVariable int currentPage, @PathVariable int pageSize){
@@ -115,7 +127,6 @@ public class ArticleController {
         message.setEnable(true);
         message.setMessage(article.getAuthor()+"用户你好，你最近"+article.getDate()+"发布的文章"+article.getTitle()+"经过管理员的审核通过");
         messageService.save(message);
-
         return new R(true,articleService.updateById(article));
     }
     //用户查看自己发表文章是否被批准
