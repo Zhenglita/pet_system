@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class QiniuUtils {
 
-    public static  final String url = "http://rr4p9tw66.hn-bkt.clouddn.com/";  //改成你的外链域名
+    public static  final String url = "http://pet.zopthetarget.top/";  //改成你的外链域名
 
     @Value("${qiniu.accessKey}")
     private  String accessKey;
