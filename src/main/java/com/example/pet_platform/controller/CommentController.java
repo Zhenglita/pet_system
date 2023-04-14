@@ -100,4 +100,35 @@ public class CommentController {
     public R getByUserId(@PathVariable Integer uid){
         return new R(true, commentMapper.findAllByUserId(uid));
     }
+    @GetMapping("/home/new")
+    public R getTenNewComment(){
+        QueryWrapper<Comment> qw=new QueryWrapper<>();
+        qw.select().orderByDesc("createtime");
+        qw.eq("content_type","正常评论");
+        List<Comment> list = commentService.list(qw);
+        if (list.size()>10){
+            List<Comment> comments=list.subList(0,10);
+            return new R (true,comments);
+        }else {
+            List<Comment> comments=list.subList(0, list.size());
+            return new R(true,comments);
+        }
+
+    }
+    @GetMapping("/new/{id}")
+    public R getTheArticleNewComment(@PathVariable Integer id){
+        QueryWrapper<Comment> qw=new QueryWrapper<>();
+        qw.select().orderByDesc("createtime");
+        qw.eq("content_type","正常评论");
+        qw.eq("foregin_id",id);
+        List<Comment> list = commentService.list(qw);
+        if (list.size()>5){
+            List<Comment> comments=list.subList(0,5);
+            return new R (true,comments);
+        }else {
+            List<Comment> comments=list.subList(0, list.size());
+            return new R(true,comments);
+        }
+
+    }
 }
