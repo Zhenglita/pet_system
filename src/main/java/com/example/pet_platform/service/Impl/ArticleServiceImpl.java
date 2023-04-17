@@ -29,7 +29,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public IPage<Article> getPage(int currentPage, int pageSize, Article article) {
         LambdaQueryWrapper<Article> lqw=new LambdaQueryWrapper<>();
         if (article!=null){
-            lqw.like(Strings.isNotEmpty(article.getMessage()),Article::getMessage,article.getMessage());
+            lqw.like(Strings.isNotEmpty(article.getTitle()),Article::getTitle,article.getTitle());
             lqw.eq(true,Article::getEnable,true);
         }
         IPage<Article> page=new Page<>(currentPage,pageSize);

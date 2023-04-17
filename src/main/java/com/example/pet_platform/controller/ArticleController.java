@@ -201,8 +201,80 @@ public class ArticleController {
             return new R (true,articles);
         }else {
             List<Comment> articles=list.subList(0,list.size());
+            QueryWrapper<Article> QW=new QueryWrapper<>();
+            QW.select("aid");
+            List<Article> ArticleList=articleService.list(QW);
+            List<Integer> collect = ArticleList.stream().map(Article::getAid).collect(Collectors.toList());
+            for (int i=collect.size()-1;i>=0;i--){
+                Integer integer = collect.get(i);
+                boolean present = articles.stream().anyMatch(a -> a.getForegin_id().equals(integer));
+                if (present){
+                    collect.remove(collect.get(i));
+                }
+            }
+            while (articles.size()<10){
+                Random rand = new Random();
+                int n=rand.nextInt(collect.size());
+                Integer x = collect.get(n);
+                collect.remove(x);
+                //获取id为x的文章，将该文章的名字加入articles里
+                QueryWrapper<Article> qw_id=new QueryWrapper<>();
+                qw_id.eq("aid",x);
+                Article one = articleService.getOne(qw_id);
+                Comment comment=new Comment();
+                comment.setForegin_id(x);
+                comment.setArticlename(one.getTitle());
+                articles.add(comment);
+            }
             return new R (true,articles);
         }
-//        return new R (true,articles);
+
+    }
+    //首页随机推荐
+    @GetMapping("/home/random")
+    public R getTenRandomArticle(){
+        List<Article> list = articleService.list();
+        List<Integer> collect = list.stream().map(Article::getAid).collect(Collectors.toList());
+        List<Article> articles=new ArrayList<>();
+        while (articles.size()<10){
+            Random rand = new Random();
+            int n=rand.nextInt(collect.size());
+            Integer x = collect.get(n);
+            collect.remove(x);
+            QueryWrapper<Article> qw_id=new QueryWrapper<>();
+            qw_id.eq("aid",x);
+            Article one = articleService.getOne(qw_id);
+            articles.add(one);
+        }
+
+        return new R (true,articles);
+    }
+    @GetMapping("/home/mend")
+    public R getTenMendArticle(){
+        List<Article> list = articleService.list();
+        for (int i = 0; i < list.size(); i++) {
+            int maxIndex = i;
+            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
+            for (int j = i + 1; j < list.size(); j++) {
+                if (list.get(j).getEnable_rate() > list.get(maxIndex).getEnable_rate()) {
+                    // 记录最小的数的下标
+                    maxIndex = j;
+                }
+            }
+            // 如果最小的数和当前遍历的下标不一致，则交换
+            if (i != maxIndex) {
+                Article article = list.get(i);
+                list.set(i,list.get(maxIndex));
+                list.set(maxIndex,article);
+            }
+        }
+        if (list.size()>10){
+            List<Article> articles=list.subList(0,10);
+            return new R (true,articles);
+        }
+        else {
+            List<Article> articles=list.subList(0, list.size());
+            return new R (true,articles);
+        }
     }
 }
