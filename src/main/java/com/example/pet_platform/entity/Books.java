@@ -30,5 +30,9 @@ public class Books {
     private Integer ocount;
     @TableField(exist = false)
     private List<Books> list;
+    @TableField(exist = false)
+    private Integer value;
+    @TableField(exist = false)
+    private String name;
 
 }

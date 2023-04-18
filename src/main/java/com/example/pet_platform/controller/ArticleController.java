@@ -148,7 +148,7 @@ public class ArticleController {
     }
     //热门文章
     @GetMapping("/home/comment")
-    public R getTenCommentArticle(){
+    public R getTenCommentArticle(Integer size){
         QueryWrapper<Comment> qw=new QueryWrapper<>();
         qw.select("foregin_id").groupBy("foregin_id");
         List<Comment> list = commentService.list(qw);
@@ -196,6 +196,7 @@ public class ArticleController {
                 list.set(maxIndex,comment);
             }
         }
+        if (size==null){
         if (list.size()>10){
             List<Comment> articles=list.subList(0,10);
             return new R (true,articles);
@@ -227,6 +228,41 @@ public class ArticleController {
                 articles.add(comment);
             }
             return new R (true,articles);
+        }
+        }
+        else {
+            if (list.size()>size){
+                List<Comment> articles=list.subList(0,size);
+                return new R (true,articles);
+            }else {
+                List<Comment> articles=list.subList(0,list.size());
+                QueryWrapper<Article> QW=new QueryWrapper<>();
+                QW.select("aid");
+                List<Article> ArticleList=articleService.list(QW);
+                List<Integer> collect = ArticleList.stream().map(Article::getAid).collect(Collectors.toList());
+                for (int i=collect.size()-1;i>=0;i--){
+                    Integer integer = collect.get(i);
+                    boolean present = articles.stream().anyMatch(a -> a.getForegin_id().equals(integer));
+                    if (present){
+                        collect.remove(collect.get(i));
+                    }
+                }
+                while (articles.size()<size){
+                    Random rand = new Random();
+                    int n=rand.nextInt(collect.size());
+                    Integer x = collect.get(n);
+                    collect.remove(x);
+                    //获取id为x的文章，将该文章的名字加入articles里
+                    QueryWrapper<Article> qw_id=new QueryWrapper<>();
+                    qw_id.eq("aid",x);
+                    Article one = articleService.getOne(qw_id);
+                    Comment comment=new Comment();
+                    comment.setForegin_id(x);
+                    comment.setArticlename(one.getTitle());
+                    articles.add(comment);
+                }
+                return new R (true,articles);
+            }
         }
 
     }

@@ -1,8 +1,10 @@
 package com.example.pet_platform.controller;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.pet_platform.controller.util.R;
@@ -16,10 +18,13 @@ import com.example.pet_platform.service.OrderService;
 import com.example.pet_platform.service.UserService;
 //import com.sun.org.apache.xpath.internal.operations.Or;
 
+import com.example.pet_platform.util.JWTUtils;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,8 +42,12 @@ public class OrderController {
   @Resource
   private OrderService orderService;
   @GetMapping
-  private R getall(){
-    List<Order> list = orderService.list();
+  private R getall(Order orders){
+   LambdaQueryWrapper<Order> lqw1=new LambdaQueryWrapper<>();
+   lqw1.eq(StrUtil.isNotEmpty(orders.getState()),Order::getState,orders.getState());
+//    QueryWrapper<Order> queryWrapper=new QueryWrapper<>();
+//    queryWrapper.eq("state",orders.getState());
+    List<Order> list = orderService.list(lqw1);
     for (Order order:list)
     {
       LambdaQueryWrapper<User> lambdaQueryWrapper=new LambdaQueryWrapper<>();
@@ -53,7 +62,13 @@ public class OrderController {
       return new R(true,list);
   }
   @PostMapping
-  private R add(@RequestBody Order order){
+  private R add(@RequestBody Order order, HttpServletRequest request){
+    String token = request.getHeader("Authorization");
+    DecodedJWT verify = JWTUtils.verify(token);
+    String userid = verify.getClaim("userid").asString();
+    QueryWrapper<User> queryWrapper=new QueryWrapper<>();
+    queryWrapper.eq("uid",Integer.parseInt(userid));
+    User one = userService.getOne(queryWrapper);
     if (order.getId()==null){
       Date date=new Date();
       order.setTime(DateUtil.formatDateTime(date));
@@ -61,6 +76,7 @@ public class OrderController {
       order.setUser_id(order.getUser_id());
       order.setNo(DateUtil.format(date,"yyyyMHdd")+System.currentTimeMillis());
       order.setUser_id(order.getUser_id());
+      order.setPlace(one.getPlace());
       order.setState("待发货");
     orderService.save(order);
     List<Cart> carts=order.getCarts();

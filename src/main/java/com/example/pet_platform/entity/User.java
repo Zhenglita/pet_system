@@ -18,6 +18,7 @@ public class User {
     private String sex;
     private String avatar;
     private String role;
+    private String place;
 
 
 }
