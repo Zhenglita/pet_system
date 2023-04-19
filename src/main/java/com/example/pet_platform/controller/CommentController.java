@@ -3,6 +3,7 @@ package com.example.pet_platform.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.pet_platform.controller.util.CensorResult;
 import com.example.pet_platform.controller.util.R;
@@ -17,6 +18,7 @@ import com.example.pet_platform.service.ArticleService;
 import com.example.pet_platform.service.BaiduContentCensorService;
 import com.example.pet_platform.service.CommentService;
 import com.example.pet_platform.service.UserService;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 //import sun.dc.pr.PRError;
@@ -104,7 +106,14 @@ public class CommentController {
     }
     @GetMapping("/a/{uid}")
     public R getByUserId(@PathVariable Integer uid){
-        return new R(true, commentMapper.findAllByUserId(uid));
+        List<Comment> allByUserId = commentMapper.findAllByUserId(uid);
+        for(Comment comment:allByUserId){
+                QueryWrapper<Comment> lqw=new QueryWrapper<>();
+                lqw.eq("pid",comment.getId());
+                comment.setCount(commentService.count(lqw));
+        }
+
+        return new R(true, allByUserId);
     }
     @GetMapping("/home/new")
     public R getTenNewComment(){

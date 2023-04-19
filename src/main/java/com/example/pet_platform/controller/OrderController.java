@@ -19,7 +19,6 @@ import com.example.pet_platform.service.UserService;
 //import com.sun.org.apache.xpath.internal.operations.Or;
 
 import com.example.pet_platform.util.JWTUtils;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

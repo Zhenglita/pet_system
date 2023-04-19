@@ -105,4 +105,11 @@ public class UserController {
         }
         return new R(true,page);
     }
+    @GetMapping("/change/{uid}")
+    public R getChangeUser(@PathVariable Integer uid){
+        LambdaQueryWrapper<User> lambdaQueryWrapper=new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(true,User::getUid,uid);
+        User one = userService.getOne(lambdaQueryWrapper);
+        return  new R(true,one.getRole());
+    }
 }

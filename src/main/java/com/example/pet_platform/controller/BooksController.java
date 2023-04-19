@@ -24,6 +24,7 @@ public class BooksController {
     }
     @GetMapping("/{currentPage}/{pageSize}")
     public R getPage(@PathVariable int currentPage, @PathVariable int pageSize, Books books){
+        System.err.println(books.getBookname());
         IPage<Books> page=booksService.getPage(currentPage,pageSize,books);
         if (currentPage>page.getPages()){
             page=booksService.getPage((int)page.getPages(),pageSize,books);
@@ -66,36 +67,41 @@ public class BooksController {
     @GetMapping("/admin")
     public R getTopFive(){
         List<Books> list = booksService.list();
-        for (int i = 0; i < list.size(); i++) {
-            int maxIndex = i;
-            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
-            for (int j = i + 1; j < list.size(); j++) {
-                if (list.get(j).getQuantity() > list.get(maxIndex).getQuantity()) {
-                    // 记录最小的数的下标
-                    maxIndex = j;
-                }
-            }
-            // 如果最小的数和当前遍历的下标不一致，则交换
-            if (i != maxIndex) {
-                Books books = list.get(i);
-                list.set(i,list.get(maxIndex));
-                list.set(maxIndex,books);
-            }
-        }
-        if (list.size()>5){
-            List<Books> books=list.subList(0,5);
-            for (Books books1:books){
-                books1.setName(books1.getBookname());
-                books1.setValue(books1.getQuantity());
-            }
-            return new R (true,books);}
-        else {
-            List<Books> books=list.subList(0, list.size());
-            for (Books books1:books){
-                books1.setName(books1.getBookname());
-                books1.setValue(books1.getQuantity());
-            }
-            return new R(true,books);
-        }
+//        for (int i = 0; i < list.size(); i++) {
+//            int maxIndex = i;
+//            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
+//            for (int j = i + 1; j < list.size(); j++) {
+//                if (list.get(j).getQuantity() > list.get(maxIndex).getQuantity()) {
+//                    // 记录最小的数的下标
+//                    maxIndex = j;
+//                }
+//            }
+//            // 如果最小的数和当前遍历的下标不一致，则交换
+//            if (i != maxIndex) {
+//                Books books = list.get(i);
+//                list.set(i,list.get(maxIndex));
+//                list.set(maxIndex,books);
+//            }
+//        }
+//        if (list.size()>5){
+//            List<Books> books=list.subList(0,5);
+//            for (Books books1:books){
+//                books1.setName(books1.getBookname());
+//                books1.setValue(books1.getQuantity());
+//            }
+//            return new R (true,books);}
+//        else {
+//            List<Books> books=list.subList(0, list.size());
+//            for (Books books1:books){
+//                books1.setName(books1.getBookname());
+//                books1.setValue(books1.getQuantity());
+//            }
+//            return new R(true,books);
+//        }
+        for (Books books:list){
+            books.setName(books.getBookname());
+            books.setValue(books.getQuantity());
+           }
+        return new R(true,list);
     }
 }
