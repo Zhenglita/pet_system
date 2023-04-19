@@ -94,6 +94,12 @@ public class CommentController {
         Article byId = articleService.getById(comment.getForegin_id());
         byId.setComment(byId.getComment()-1);
         articleService.updateById(byId);
+            QueryWrapper<Comment> queryWrapper=new QueryWrapper<>();
+            queryWrapper.eq("pid",comment.getId());
+            List<Comment> list = commentService.list(queryWrapper);
+            for(Comment comment1:list){
+                commentService.removeById(comment1.getId());
+            }
         return new R(true,commentService.removeById(id));
     }
     @GetMapping("/a/{uid}")

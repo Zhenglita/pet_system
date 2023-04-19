@@ -18,5 +18,6 @@ public class UserDTO {
     private String avatar;
     private String token;
     private String role;
+    private String place;
 
 }

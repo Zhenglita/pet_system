@@ -19,6 +19,7 @@ public class Order {
     private String time;
     private String pay_time;
     private String alipay_no;
+    private String place;
     @TableField(exist = false)
     private List<Cart> carts;
     @TableField(exist = false)
