@@ -3,14 +3,16 @@ package com.example.pet_platform.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.entity.Books;
-import com.example.pet_platform.entity.Comment;
-import com.example.pet_platform.mapper.BooksMapper;
+import com.example.pet_platform.entity.OrderBooks;
 import com.example.pet_platform.service.BooksService;
+import com.example.pet_platform.service.OrderBooksService;
 import com.example.pet_platform.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/books")
@@ -18,6 +20,10 @@ import java.util.List;
 public class BooksController {
     @Autowired
     private BooksService booksService;
+    @Resource
+    private OrderService orderService;
+    @Resource
+    private OrderBooksService orderBooksService;
     @GetMapping
     public R getAll(){
         return new R(true,booksService.list());
@@ -103,5 +109,60 @@ public class BooksController {
             books.setValue(books.getQuantity());
            }
         return new R(true,list);
+    }
+    @GetMapping("/admin/order")
+    public R getTop(){
+        List<OrderBooks> list = orderBooksService.list();
+        List<Books> bookslist=new ArrayList<>();
+        Map<Integer, List<OrderBooks>> collect = list.stream().collect(Collectors.groupingBy(OrderBooks::getBooks_id));
+        Set<Integer> set = collect.keySet();
+
+        //遍历迭代器并输出元素
+        for (Integer integer : set) {
+            Books byId = booksService.getById(integer);
+            List<OrderBooks> list1 = collect.get(integer);
+            Integer sum=0;
+            for (OrderBooks orderBooks:list1){
+                sum=orderBooks.getNum()+sum;
+            }
+            Books books=new Books();
+            books.setName(byId.getBookname());
+            books.setValue(sum);
+            bookslist.add(books);
+        }
+        for (int i = 0; i < bookslist.size(); i++) {
+            int maxIndex = i;
+            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
+            for (int j = i + 1; j < bookslist.size(); j++) {
+                if (bookslist.get(j).getValue() > bookslist.get(maxIndex).getValue()) {
+                    // 记录最小的数的下标
+                    maxIndex = j;
+                }
+            }
+            // 如果最小的数和当前遍历的下标不一致，则交换
+            if (i != maxIndex) {
+                Books books = bookslist.get(i);
+                bookslist.set(i,bookslist.get(maxIndex));
+                bookslist.set(maxIndex,books);
+            }
+        }
+        if (bookslist.size()>5){
+            List<Books> books=bookslist.subList(0,5);
+            for (Books books1:books){
+                books1.setName(books1.getName());
+                books1.setValue(books1.getValue());
+            }
+            return new R (true,books);}
+        else {
+            List<Books> books = bookslist.subList(0, bookslist.size());
+            for (Books books1 : books) {
+                books1.setName(books1.getName());
+                books1.setValue(books1.getValue());
+            }
+            Collections.reverse(books);
+            return new R(true,books);
+        }
+
+
     }
 }

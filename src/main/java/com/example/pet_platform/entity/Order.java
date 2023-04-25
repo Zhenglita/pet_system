@@ -20,6 +20,7 @@ public class Order {
     private String pay_time;
     private String alipay_no;
     private String place;
+    private Boolean enable;
     @TableField(exist = false)
     private List<Cart> carts;
     @TableField(exist = false)
