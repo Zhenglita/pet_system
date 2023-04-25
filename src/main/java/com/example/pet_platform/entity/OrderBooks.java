@@ -11,6 +11,7 @@ public class OrderBooks {
     private Integer num;
     private Integer books_id;
     private Integer order_id;
+    private Boolean enable;
     @TableField(exist = false)
     private List<OrderBooks> orderBooks;
     @TableField(exist = false)

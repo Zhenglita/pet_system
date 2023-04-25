@@ -44,6 +44,7 @@ public class OrderController {
   private R getall(Order orders){
    LambdaQueryWrapper<Order> lqw1=new LambdaQueryWrapper<>();
    lqw1.eq(StrUtil.isNotEmpty(orders.getState()),Order::getState,orders.getState());
+   lqw1.eq(true,Order::getEnable,false);
 //    QueryWrapper<Order> queryWrapper=new QueryWrapper<>();
 //    queryWrapper.eq("state",orders.getState());
     List<Order> list = orderService.list(lqw1);
@@ -96,6 +97,7 @@ public class OrderController {
   private R getAll(@PathVariable Integer uid){
     LambdaQueryWrapper<Order> lqw1=new LambdaQueryWrapper<>();
     lqw1.eq(true,Order::getUser_id,uid);
+    lqw1.eq(true,Order::getEnable,false);
     List<Order> list = orderService.list(lqw1);
     for (Order order:list){
       LambdaQueryWrapper<OrderBooks> lqw=new LambdaQueryWrapper<>();
@@ -107,20 +109,34 @@ public class OrderController {
   }
   @DeleteMapping("/{id}")
   private R del(@PathVariable Integer id){
-    boolean b = orderService.removeById(id);
+    Order byId = orderService.getById(id);
+    byId.setEnable(true);
+    boolean b = orderService.updateById(byId);
     LambdaQueryWrapper<OrderBooks> lambdaQueryWrapper=new LambdaQueryWrapper<>();
     lambdaQueryWrapper.eq(true,OrderBooks::getOrder_id,id);
-    boolean remove = orderBooksService.remove(lambdaQueryWrapper);
+    List<OrderBooks> list =
+            orderBooksService.list(lambdaQueryWrapper);
+    for (OrderBooks orderBooks:list){
+      orderBooks.setEnable(true);
+      orderBooksService.updateById(orderBooks);
+    }
 
-   return new R(b&&remove);}
+   return new R(true);}
   @PostMapping("/del")
   private R Del(@RequestBody Order order){
     List<Order> orders = order.getOrders();
     for (Order order1:orders){
-      orderService.removeById(order1.getId());
+      Order byId = orderService.getById(order1.getId());
+      byId.setEnable(true);
+      orderService.updateById(byId);
       LambdaQueryWrapper<OrderBooks> lambdaQueryWrapper=new LambdaQueryWrapper<>();
       lambdaQueryWrapper.eq(true,OrderBooks::getOrder_id,order1.getId());
-      orderBooksService.remove(lambdaQueryWrapper);
+      List<OrderBooks> list =
+              orderBooksService.list(lambdaQueryWrapper);
+      for (OrderBooks orderBooks:list){
+        orderBooks.setEnable(true);
+        orderBooksService.updateById(orderBooks);
+      }
     }
 
     return new R(true);}
