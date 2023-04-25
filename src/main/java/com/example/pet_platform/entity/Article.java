@@ -23,6 +23,7 @@ public class Article {
     private String title;
     private String message;
     private String  agree;
+    private String  type;
     private Integer  comment;
     private Integer uid;
     private Boolean enable;

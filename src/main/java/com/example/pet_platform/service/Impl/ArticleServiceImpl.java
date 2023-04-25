@@ -31,6 +31,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (article!=null){
             lqw.like(Strings.isNotEmpty(article.getTitle()),Article::getTitle,article.getTitle());
             lqw.eq(true,Article::getEnable,true);
+            lqw.eq(Strings.isNotEmpty(article.getType()),Article::getType,article.getType());
         }
         IPage<Article> page=new Page<>(currentPage,pageSize);
         articleMapper.selectPage(page,lqw);
