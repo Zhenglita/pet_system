@@ -13,9 +13,11 @@ import com.example.pet_platform.mapper.UserMapper;
 import com.example.pet_platform.entity.User;
 import com.example.pet_platform.service.UserService;
 import com.example.pet_platform.util.JWTUtils;
+import io.netty.util.internal.StringUtil;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 设置token
             String token = JWTUtils.getToken(one.getUid().toString(), one.getUsername());
             userDTO.setToken(token);
+            if (StringUtils.isEmpty(one.getPlace())){
+                userDTO.setPlace("");
+            }
             return userDTO;
         }else{
             return userDTO;
