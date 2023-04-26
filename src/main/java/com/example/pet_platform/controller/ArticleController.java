@@ -161,6 +161,7 @@ public class ArticleController {
             Article one = articleService.getOne(lqw2);
             comment.setArticlename(one.getTitle());
             comment.setCount(list1.size());
+            comment.setArticleUrl(one.getImage());
         }
 
 //        for (int i = 0; i < list.size(); i++) {
@@ -225,6 +226,7 @@ public class ArticleController {
                 Comment comment=new Comment();
                 comment.setForegin_id(x);
                 comment.setArticlename(one.getTitle());
+                comment.setArticleUrl(one.getImage());
                 articles.add(comment);
             }
             return new R (true,articles);

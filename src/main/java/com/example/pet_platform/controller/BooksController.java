@@ -128,6 +128,9 @@ public class BooksController {
             Books books=new Books();
             books.setName(byId.getBookname());
             books.setValue(sum);
+            books.setId(byId.getId());
+            books.setImage(byId.getImage());
+            books.setPrice(byId.getPrice());
             bookslist.add(books);
         }
         for (int i = 0; i < bookslist.size(); i++) {
@@ -146,8 +149,8 @@ public class BooksController {
                 bookslist.set(maxIndex,books);
             }
         }
-        if (bookslist.size()>5){
-            List<Books> books=bookslist.subList(0,5);
+        if (bookslist.size()>6){
+            List<Books> books=bookslist.subList(0,6);
             for (Books books1:books){
                 books1.setName(books1.getName());
                 books1.setValue(books1.getValue());
