@@ -39,15 +39,7 @@ public class UserController {
 
     @PostMapping
     public R save(@RequestBody User user) {
-        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(true, User::getUsername, user.getUsername());
-        List<User> list = userService.list(lqw);
-        if (list.size() > 0) {
-            return new R(false);
-        } else {
-            user.setAvatar("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png");
-            return new R(true, userService.save(user));
-        }
+       return userService.saveOwn(user);
     }
 
     @PutMapping
@@ -113,9 +105,6 @@ public class UserController {
 
     @GetMapping("/change/{uid}")
     public R getChangeUser(@PathVariable Integer uid) {
-        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(true, User::getUid, uid);
-        User one = userService.getOne(lambdaQueryWrapper);
-        return new R(true, one.getRole());
+      return userService.getChangeUser(uid);
     }
 }

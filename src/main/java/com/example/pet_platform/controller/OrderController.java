@@ -33,153 +33,46 @@ import java.util.stream.Collectors;
 @RequestMapping("/orders")
 public class OrderController {
     @Resource
-    private OrderBooksService orderBooksService;
-    @Resource
-    private CartService cartService;
-    @Resource
-    private UserService userService;
-    @Resource
     private OrderService orderService;
 
     @GetMapping
     private R getall(Order orders) {
-        LambdaQueryWrapper<Order> lqw1 = new LambdaQueryWrapper<>();
-        lqw1.eq(StrUtil.isNotEmpty(orders.getState()), Order::getState, orders.getState());
-        lqw1.eq(true, Order::getEnable, false);
-//    QueryWrapper<Order> queryWrapper=new QueryWrapper<>();
-//    queryWrapper.eq("state",orders.getState());
-        List<Order> list = orderService.list(lqw1);
-        for (Order order : list) {
-            LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(true, User::getUid, order.getUser_id());
-            User one = userService.getOne(lambdaQueryWrapper);
-            order.setUsers(one);
-            LambdaQueryWrapper<OrderBooks> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(true, OrderBooks::getOrder_id, order.getId());
-            List<OrderBooks> orderBooks = orderBooksService.list(lqw);
-            order.setOrderBooks(orderBooks);
-        }
-        return new R(true, list);
+      return orderService.getall(orders);
     }
 
     @PostMapping
     private R add(@RequestBody Order order, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("uid", Integer.parseInt(userid));
-        User one = userService.getOne(queryWrapper);
-        if (order.getId() == null) {
-            Date date = new Date();
-            order.setTime(DateUtil.formatDateTime(date));
-            order.setTotal_price(order.getTotal_price());
-            order.setUser_id(order.getUser_id());
-            order.setNo(DateUtil.format(date, "yyyyMHdd") + System.currentTimeMillis());
-            order.setUser_id(order.getUser_id());
-            order.setPlace(one.getPlace());
-            order.setState("待发货");
-            orderService.save(order);
-            List<Cart> carts = order.getCarts();
-            for (Cart cart : carts) {
-                OrderBooks orderBooks = new OrderBooks();
-                orderBooks.setOrder_id(order.getId());
-                orderBooks.setBooks_id(cart.getBooks_id());
-                orderBooks.setNum(cart.getNum());
-                orderBooksService.save(orderBooks);
-                cartService.removeById(cart.getId());
-            }
-        } else {
-            orderService.updateById(order);
-        }
-        return new R(true, order);
+       return orderService.add(order,request);
     }
 
     @GetMapping("/{uid}")
     private R getAll(@PathVariable Integer uid) {
-        LambdaQueryWrapper<Order> lqw1 = new LambdaQueryWrapper<>();
-        lqw1.eq(true, Order::getUser_id, uid);
-        lqw1.eq(true, Order::getEnable, false);
-        List<Order> list = orderService.list(lqw1);
-        for (Order order : list) {
-            LambdaQueryWrapper<OrderBooks> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(true, OrderBooks::getOrder_id, order.getId());
-            List<OrderBooks> orderBooks = orderBooksService.list(lqw);
-            order.setOrderBooks(orderBooks);
-        }
-        return new R(true, list);
+       return orderService.getAll(uid);
     }
 
     @DeleteMapping("/{id}")
     private R del(@PathVariable Integer id) {
-        Order byId = orderService.getById(id);
-        byId.setEnable(true);
-        boolean b = orderService.updateById(byId);
-        LambdaQueryWrapper<OrderBooks> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(true, OrderBooks::getOrder_id, id);
-        List<OrderBooks> list =
-                orderBooksService.list(lambdaQueryWrapper);
-        for (OrderBooks orderBooks : list) {
-            orderBooks.setEnable(true);
-            orderBooksService.updateById(orderBooks);
-        }
-
-        return new R(true);
+       return orderService.del(id);
     }
 
     @PostMapping("/del")
     private R Del(@RequestBody Order order) {
-        List<Order> orders = order.getOrders();
-        for (Order order1 : orders) {
-            Order byId = orderService.getById(order1.getId());
-            byId.setEnable(true);
-            orderService.updateById(byId);
-            LambdaQueryWrapper<OrderBooks> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(true, OrderBooks::getOrder_id, order1.getId());
-            List<OrderBooks> list =
-                    orderBooksService.list(lambdaQueryWrapper);
-            for (OrderBooks orderBooks : list) {
-                orderBooks.setEnable(true);
-                orderBooksService.updateById(orderBooks);
-            }
-        }
-
-        return new R(true);
+       return orderService.Del(order);
     }
 
     @GetMapping("/select/{name}/{uid}")
     private R getByname(@PathVariable String name, @PathVariable Integer uid) {
-        LambdaQueryWrapper<Order> lqw = new LambdaQueryWrapper<>();
-        lqw.like(true, Order::getName, name);
-        lqw.like(true, Order::getUser_id, uid);
-        List<Order> list = orderService.list(lqw);
-        return new R(true, list);
+       return orderService.getByname(name, uid);
     }
 
     @PutMapping("/{id}")
     private R updata(@PathVariable Integer id) {
-        Order byId = orderService.getById(id);
-        if (byId != null) {
-            byId.setState("已发货");
-            orderService.updateById(byId);
-            return new R(true);
-        } else {
-            return new R(false);
-        }
-
+       return orderService.updata(id);
     }
 
     @PutMapping("/del/{id}")
     private R delupdata(@PathVariable Integer id) {
-        Order byId = orderService.getById(id);
-        if (byId != null) {
-            byId.setState("交易被取消");
-            orderService.updateById(byId);
-            return new R(true);
-        } else {
-            return new R(false);
-        }
-
+       return orderService.delupdata(id);
     }
 
 }

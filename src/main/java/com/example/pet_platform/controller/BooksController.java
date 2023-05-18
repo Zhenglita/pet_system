@@ -26,10 +26,6 @@ import java.util.stream.Collectors;
 public class BooksController {
     @Autowired
     private BooksService booksService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private OrderBooksService orderBooksService;
 
     @GetMapping
     public R getAll() {
@@ -87,113 +83,14 @@ public class BooksController {
 
     @GetMapping("/admin")
     public R getTopFive() {
-        List<Books> list = booksService.list();
-//        for (int i = 0; i < list.size(); i++) {
-//            int maxIndex = i;
-//            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
-//            for (int j = i + 1; j < list.size(); j++) {
-//                if (list.get(j).getQuantity() > list.get(maxIndex).getQuantity()) {
-//                    // 记录最小的数的下标
-//                    maxIndex = j;
-//                }
-//            }
-//            // 如果最小的数和当前遍历的下标不一致，则交换
-//            if (i != maxIndex) {
-//                Books books = list.get(i);
-//                list.set(i,list.get(maxIndex));
-//                list.set(maxIndex,books);
-//            }
-//        }
-//        if (list.size()>5){
-//            List<Books> books=list.subList(0,5);
-//            for (Books books1:books){
-//                books1.setName(books1.getBookname());
-//                books1.setValue(books1.getQuantity());
-//            }
-//            return new R (true,books);}
-//        else {
-//            List<Books> books=list.subList(0, list.size());
-//            for (Books books1:books){
-//                books1.setName(books1.getBookname());
-//                books1.setValue(books1.getQuantity());
-//            }
-//            return new R(true,books);
-//        }
-        for (Books books : list) {
-            books.setName(books.getBookname());
-            books.setValue(books.getQuantity());
-        }
-        return new R(true, list);
+
+        return new R(true, booksService.getTopFive());
     }
 
     @GetMapping("/admin/order")
     public R getTop() {
-        String key = "cache:booksTen";
-        String booksTen = stringRedisTemplate.opsForValue().get(key);
-        if (StrUtil.isNotBlank(booksTen)) {
-            JSONArray jsonArray = JSONUtil.parseArray(booksTen);
-            List<Books> list = JSONUtil.toList(jsonArray, Books.class);
-            return new R(true, list);
-        }
-        List<OrderBooks> list = orderBooksService.list();
-        List<Books> bookslist = new ArrayList<>();
-        Map<Integer, List<OrderBooks>> collect = list.stream().collect(Collectors.groupingBy(OrderBooks::getBooks_id));
-        Set<Integer> set = collect.keySet();
 
-        //遍历迭代器并输出元素
-        for (Integer integer : set) {
-            Books byId = booksService.getById(integer);
-            List<OrderBooks> list1 = collect.get(integer);
-            Integer sum = 0;
-            for (OrderBooks orderBooks : list1) {
-                sum = orderBooks.getNum() + sum;
-            }
-            Books books = new Books();
-            books.setName(byId.getBookname());
-            books.setValue(sum);
-            books.setId(byId.getId());
-            books.setImage(byId.getImage());
-            books.setPrice(byId.getPrice());
-            bookslist.add(books);
-        }
-//        for (int i = 0; i < bookslist.size(); i++) {
-//            int maxIndex = i;
-//            // 把当前遍历的数和后面所有的数进行比较，并记录下最小的数的下标
-//            for (int j = i + 1; j < bookslist.size(); j++) {
-//                if (bookslist.get(j).getValue() > bookslist.get(maxIndex).getValue()) {
-//                    // 记录最小的数的下标
-//                    maxIndex = j;
-//                }
-//            }
-//            // 如果最小的数和当前遍历的下标不一致，则交换
-//            if (i != maxIndex) {
-//                Books books = bookslist.get(i);
-//                bookslist.set(i,bookslist.get(maxIndex));
-//                bookslist.set(maxIndex,books);
-//            }
-//        }
-        //快排
-        //
-        if (bookslist.size() > 6) {
-            List<Books> books = bookslist.subList(0, 6);
-            for (Books books1 : books) {
-                books1.setName(books1.getName());
-                books1.setValue(books1.getValue());
-            }
-            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(books), 30, TimeUnit.MINUTES);
-            return new R(true, books);
-        } else {
-            List<Books> books = bookslist.subList(0, bookslist.size());
-            for (Books books1 : books) {
-                books1.setName(books1.getName());
-                books1.setValue(books1.getValue());
-            }
-            Collections.reverse(books);
-            stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(books), 30, TimeUnit.MINUTES);
-            return new R(true, books);
-        }
-
-
+            return new R(true, booksService.getTop());
     }
 
 }
