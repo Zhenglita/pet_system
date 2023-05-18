@@ -15,15 +15,16 @@ import org.springframework.stereotype.Service;
 public class BooksServiceImpl extends ServiceImpl<BooksMapper, Books> implements BooksService {
     @Autowired
     private BooksMapper booksMapper;
+
     @Override
     public IPage<Books> getPage(int currentPage, int pageSize, Books books) {
-        LambdaQueryWrapper<Books> lqw=new LambdaQueryWrapper<>();
-        lqw.like(Strings.isNotEmpty(books.getType()),Books::getType,books.getType());
-        lqw.like(Strings.isNotEmpty(books.getAuthor()),Books::getAuthor,books.getAuthor());
-        lqw.like(Strings.isNotEmpty(books.getBookname()),Books::getBookname,books.getBookname());
-        lqw.eq(books.getEnable()!=null,Books::getEnable,books.getEnable());
-        IPage<Books> page=new Page<>(currentPage,pageSize);
-        booksMapper.selectPage(page,lqw);
+        LambdaQueryWrapper<Books> lqw = new LambdaQueryWrapper<>();
+        lqw.like(Strings.isNotEmpty(books.getType()), Books::getType, books.getType());
+        lqw.like(Strings.isNotEmpty(books.getAuthor()), Books::getAuthor, books.getAuthor());
+        lqw.like(Strings.isNotEmpty(books.getBookname()), Books::getBookname, books.getBookname());
+        lqw.eq(books.getEnable() != null, Books::getEnable, books.getEnable());
+        IPage<Books> page = new Page<>(currentPage, pageSize);
+        booksMapper.selectPage(page, lqw);
         return page;
     }
 }

@@ -9,6 +9,7 @@ import com.example.pet_platform.controller.util.CensorResult;
 import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.entity.Article;
 import com.example.pet_platform.entity.Comment;
+
 import java.lang.reflect.Field;
 
 import com.example.pet_platform.entity.User;
@@ -41,108 +42,116 @@ public class CommentController {
     private ArticleService articleService;
     @Resource
     private BaiduContentCensorService baiduContentCensorService;
+
     @GetMapping
-    public R getall(){
-        return new R(true,commentService.list());
+    public R getall() {
+        return new R(true, commentService.list());
     }
+
     @GetMapping("/admin")
-    public R getSensitiveAll(){
+    public R getSensitiveAll() {
         List<Comment> list = commentService.list();
-        for(Comment comment:list){
+        for (Comment comment : list) {
             Article byId = articleService.getById(comment.getForegin_id());
             comment.setArticlename(byId.getTitle());
         }
         List<Comment> collect = list.stream().filter(comment -> !"正常评论".equals(comment.getContent_type())).collect(Collectors.toList());
-        return new R(true,collect);
+        return new R(true, collect);
     }
+
     @PostMapping
     public R add(@RequestBody Comment comment) throws IllegalAccessException {
         Article byId = articleService.getById(comment.getForegin_id());
-        byId.setComment(byId.getComment()+1);
+        byId.setComment(byId.getComment() + 1);
         articleService.updateById(byId);
         CensorResult commonTextCensorResult = baiduContentCensorService.getCommonTextCensorResult(comment.getContent());
         System.err.println(commonTextCensorResult.getTextCensorJson());
         Map map = JSONObject.parseObject(JSONObject.toJSONString(JSONObject.parseObject(commonTextCensorResult.getTextCensorJson())), Map.class);
-        if (map.get("data")!=null){
-        List list =(List) map.get("data");
-        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(list.get(0));
+        if (map.get("data") != null) {
+            List list = (List) map.get("data");
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(list.get(0));
             int length = comment.getContent().length();
             comment.setReal_content(comment.getContent());
-            StringBuilder x= new StringBuilder();
-            for(int i=0;i<length;i++){
+            StringBuilder x = new StringBuilder();
+            for (int i = 0; i < length; i++) {
                 x.append("*");
             }
             comment.setContent(x.toString());
             comment.setContent_type(jsonObject.get("msg").toString());
-        }else {
+        } else {
             comment.setReal_content(comment.getContent());
             comment.setContent_type("正常评论");
         }
 
-        return new R(true,commentService.save(comment));
+        return new R(true, commentService.save(comment));
     }
+
     @GetMapping("/s/{foreginId}")
-    public R getById(@PathVariable Integer foreginId){
-        List<Comment> list=commentMapper.findAllByForeginId(foreginId);
+    public R getById(@PathVariable Integer foreginId) {
+        List<Comment> list = commentMapper.findAllByForeginId(foreginId);
         List<Comment> collect = list.stream().filter(comment -> comment.getPid() == null).collect(Collectors.toList());
-        for(Comment comment:collect){
-            comment.setChildren(list.stream().filter(m->comment.getId().equals(m.getPid())).collect(Collectors.toList()));
+        for (Comment comment : collect) {
+            comment.setChildren(list.stream().filter(m -> comment.getId().equals(m.getPid())).collect(Collectors.toList()));
         }
-        return new R(true,collect);
+        return new R(true, collect);
     }
+
     @DeleteMapping("{id}")
-    public R deleteById(@PathVariable Integer id){
+    public R deleteById(@PathVariable Integer id) {
         Comment comment = commentService.getById(id);
         Article byId = articleService.getById(comment.getForegin_id());
-        byId.setComment(byId.getComment()-1);
+        byId.setComment(byId.getComment() - 1);
         articleService.updateById(byId);
-            QueryWrapper<Comment> queryWrapper=new QueryWrapper<>();
-            queryWrapper.eq("pid",comment.getId());
-            List<Comment> list = commentService.list(queryWrapper);
-            for(Comment comment1:list){
-                commentService.removeById(comment1.getId());
-            }
-        return new R(true,commentService.removeById(id));
+        QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", comment.getId());
+        List<Comment> list = commentService.list(queryWrapper);
+        for (Comment comment1 : list) {
+            commentService.removeById(comment1.getId());
+        }
+        return new R(true, commentService.removeById(id));
     }
+
     @GetMapping("/a/{uid}")
-    public R getByUserId(@PathVariable Integer uid){
+    public R getByUserId(@PathVariable Integer uid) {
         List<Comment> allByUserId = commentMapper.findAllByUserId(uid);
-        for(Comment comment:allByUserId){
-                QueryWrapper<Comment> lqw=new QueryWrapper<>();
-                lqw.eq("pid",comment.getId());
-                comment.setCount(commentService.count(lqw));
+        for (Comment comment : allByUserId) {
+            QueryWrapper<Comment> lqw = new QueryWrapper<>();
+            lqw.eq("pid", comment.getId());
+            comment.setCount(commentService.count(lqw));
         }
 
         return new R(true, allByUserId);
     }
+
     @GetMapping("/home/new")
-    public R getTenNewComment(){
-        QueryWrapper<Comment> qw=new QueryWrapper<>();
+    public R getTenNewComment() {
+        QueryWrapper<Comment> qw = new QueryWrapper<>();
         qw.select().orderByDesc("createtime");
-        qw.eq("content_type","正常评论");
+        qw.eq("content_type", "正常评论");
         List<Comment> list = commentService.list(qw);
-        if (list.size()>10){
-            List<Comment> comments=list.subList(0,10);
-            return new R (true,comments);
-        }else {
-            List<Comment> comments=list.subList(0, list.size());
-            return new R(true,comments);
+        if (list.size() > 10) {
+            List<Comment> comments = list.subList(0, 10);
+            return new R(true, comments);
+        } else {
+            List<Comment> comments = list.subList(0, list.size());
+            return new R(true, comments);
         }
 
     }
+
     @GetMapping("/new/{id}")
-    public R getTheArticleNewComment(@PathVariable Integer id){
-        QueryWrapper<Comment> qw=new QueryWrapper<>();
+    public R getTheArticleNewComment(@PathVariable Integer id) {
+        QueryWrapper<Comment> qw = new QueryWrapper<>();
         qw.select().orderByDesc("createtime");
-        qw.eq("content_type","正常评论");
-        qw.eq("foregin_id",id);
+        qw.eq("content_type", "正常评论");
+        qw.eq("foregin_id", id);
         List<Comment> list = commentService.list(qw);
-        if (list.size()>5){
-            List<Comment> comments=list.subList(0,5);
-            return new R (true,comments);
-        }else {
-            List<Comment> comments=list.subList(0, list.size());
-            return new R(true,comments);
+        if (list.size() > 5) {
+            List<Comment> comments = list.subList(0, 5);
+            return new R(true, comments);
+        } else {
+            List<Comment> comments = list.subList(0, list.size());
+            return new R(true, comments);
         }
 
     }

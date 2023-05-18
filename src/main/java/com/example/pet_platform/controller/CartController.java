@@ -28,50 +28,51 @@ public class CartController {
     private BooksService booksService;
 
     @GetMapping("/s/{booksid}/{uid}")
-    private R getStates(@PathVariable Integer booksid, @PathVariable Integer uid){
+    private R getStates(@PathVariable Integer booksid, @PathVariable Integer uid) {
 
-        LambdaQueryWrapper<Books> lqw_book=new LambdaQueryWrapper<>();
-        lqw_book.eq(true,Books::getId,booksid);
+        LambdaQueryWrapper<Books> lqw_book = new LambdaQueryWrapper<>();
+        lqw_book.eq(true, Books::getId, booksid);
         Books book = booksService.getOne(lqw_book);
 
-        LambdaQueryWrapper<Cart> lqw=new LambdaQueryWrapper<>();
-        lqw.eq(true,Cart::getBooks_id,booksid);
-        lqw.eq(true,Cart::getUser_id,uid);
+        LambdaQueryWrapper<Cart> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, Cart::getBooks_id, booksid);
+        lqw.eq(true, Cart::getUser_id, uid);
         Cart one = cartService.getOne(lqw);
-            if (one!=null){
-                return new R(false,book,one.getNum());
-            }else
-                return new R(true,book);
-}
-
+        if (one != null) {
+            return new R(false, book, one.getNum());
+        } else
+            return new R(true, book);
+    }
 
 
     @GetMapping
-    private R getAll(){
-        return new R(true,cartService.list());
+    private R getAll() {
+        return new R(true, cartService.list());
     }
+
     @PostMapping
-    private  R add(@RequestBody Cart cart){
-        LambdaQueryWrapper<Books> lqw=new LambdaQueryWrapper<>();
-        lqw.eq(true,Books::getId,cart.getBooks_id());
+    private R add(@RequestBody Cart cart) {
+        LambdaQueryWrapper<Books> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, Books::getId, cart.getBooks_id());
         Books books = booksService.getOne(lqw);
-        books.setQuantity(books.getQuantity()-cart.getNum());
+        books.setQuantity(books.getQuantity() - cart.getNum());
         booksService.updateById(books);
-        return new R(true,cartService.save(cart));
+        return new R(true, cartService.save(cart));
     }
+
     @GetMapping("/update/{booksid}/{uid}/{num}")
-    public R update(@PathVariable Integer booksid, @PathVariable Integer uid, @PathVariable Integer num){
-        LambdaQueryWrapper<Cart> lqw=new LambdaQueryWrapper<>();
-        lqw.eq(true,Cart::getBooks_id,booksid);
-        lqw.eq(true,Cart::getUser_id,uid);
+    public R update(@PathVariable Integer booksid, @PathVariable Integer uid, @PathVariable Integer num) {
+        LambdaQueryWrapper<Cart> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, Cart::getBooks_id, booksid);
+        lqw.eq(true, Cart::getUser_id, uid);
         Cart one = cartService.getOne(lqw);
         int i = num - Integer.parseInt(one.getNum().toString());
-        LambdaQueryWrapper<Books> lqw1=new LambdaQueryWrapper<>();
-        lqw1.eq(true,Books::getId,booksid);
+        LambdaQueryWrapper<Books> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.eq(true, Books::getId, booksid);
         Books books = booksService.getOne(lqw1);
         int booksQuantity = Integer.parseInt(books.getQuantity().toString()) - i;
-        if (booksQuantity<0){
-         return new R(false,"库存不足");
+        if (booksQuantity < 0) {
+            return new R(false, "库存不足");
         }
         books.setQuantity(booksQuantity);
         booksService.updateById(books);
@@ -79,35 +80,37 @@ public class CartController {
         cartService.updateById(one);
         return new R(true);
     }
+
     @GetMapping("/user/{uid}")
-    private R getByUid(@PathVariable Integer uid){
-        LambdaQueryWrapper<Cart> lqw=new LambdaQueryWrapper<>();
-        lqw.eq(true,Cart::getUser_id,uid);
+    private R getByUid(@PathVariable Integer uid) {
+        LambdaQueryWrapper<Cart> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, Cart::getUser_id, uid);
         List<Cart> list = cartService.list(lqw);
-        for (int i=0;i<list.size();i++){
+        for (int i = 0; i < list.size(); i++) {
             Books byId = booksService.getById(list.get(i).getBooks_id());
             list.get(i).setPrice(byId.getPrice());
             list.get(i).setBookname(byId.getBookname());
             list.get(i).setImage(byId.getImage());
             System.err.println(list.get(i).getNum());
         }
-        return new R(true,list);
+        return new R(true, list);
     }
+
     @DeleteMapping("/{uid}/{bid}")
-    public R del(@PathVariable Integer uid,@PathVariable Integer bid){
-        LambdaQueryWrapper<Cart> lqw=new LambdaQueryWrapper<>();
-        lqw.eq(true,Cart::getUser_id,uid);
-        lqw.eq(true,Cart::getBooks_id,bid);
+    public R del(@PathVariable Integer uid, @PathVariable Integer bid) {
+        LambdaQueryWrapper<Cart> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, Cart::getUser_id, uid);
+        lqw.eq(true, Cart::getBooks_id, bid);
         Cart one = cartService.getOne(lqw);
-        if (one!=null){
-            LambdaQueryWrapper<Books> lqw_books=new LambdaQueryWrapper<>();
-            lqw_books.eq(true,Books::getId,bid);
+        if (one != null) {
+            LambdaQueryWrapper<Books> lqw_books = new LambdaQueryWrapper<>();
+            lqw_books.eq(true, Books::getId, bid);
             Books books = booksService.getOne(lqw_books);
-            books.setQuantity(books.getQuantity()+one.getNum());
+            books.setQuantity(books.getQuantity() + one.getNum());
             booksService.updateById(books);
             cartService.removeById(one.getId());
             return new R(true);
-        }else {
+        } else {
             return new R(false);
         }
 

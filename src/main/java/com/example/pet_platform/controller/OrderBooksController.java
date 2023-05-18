@@ -18,16 +18,17 @@ public class OrderBooksController {
     private OrderBooksService orderBooksService;
     @Resource
     private BooksService booksService;
+
     @PostMapping
-    private R getAll(@RequestBody OrderBooks orderBooks){
-        List<OrderBooks> list=orderBooks.getOrderBooks();
-        for (OrderBooks orderBooks1:list){
+    private R getAll(@RequestBody OrderBooks orderBooks) {
+        List<OrderBooks> list = orderBooks.getOrderBooks();
+        for (OrderBooks orderBooks1 : list) {
             Books byId = booksService.getById(orderBooks1.getBooks_id());
             orderBooks1.setBookname(byId.getBookname());
             orderBooks1.setImage(byId.getImage());
             orderBooks1.setPrice(byId.getPrice());
             orderBooks1.setBookcontent(byId.getBookcontent());
         }
-        return new R(true,list);
+        return new R(true, list);
     }
 }

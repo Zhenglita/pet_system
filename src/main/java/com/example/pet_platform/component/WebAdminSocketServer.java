@@ -34,10 +34,12 @@ public class WebAdminSocketServer {
 
     //饿汉加载
     private static BaiduContentCensorService baiduContentCensorService;
+
     @Autowired
-    public void setBaiduContentCensorService(BaiduContentCensorService baiduContentCensorService){
-        WebAdminSocketServer.baiduContentCensorService=baiduContentCensorService;
+    public void setBaiduContentCensorService(BaiduContentCensorService baiduContentCensorService) {
+        WebAdminSocketServer.baiduContentCensorService = baiduContentCensorService;
     }
+
     private static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
 
     /**
@@ -73,12 +75,12 @@ public class WebAdminSocketServer {
     }
 
 
-
     /**
      * 收到客户端消息后调用的方法
      * 后台收到客户端发送过来的消息
      * onMessage 是一个消息的中转站
      * 接受 浏览器端 socket.send 发送过来的 json数据
+     *
      * @param message 客户端发送过来的消息
      */
     @OnMessage
@@ -93,25 +95,25 @@ public class WebAdminSocketServer {
         CensorResult result = baiduContentCensorService.getCommonTextCensorResult(text);
         Map map = com.alibaba.fastjson.JSONObject.parseObject(com.alibaba.fastjson.JSONObject.toJSONString(com.alibaba.fastjson.JSONObject.parseObject(result.getTextCensorJson())), Map.class);
         System.out.println(map.get("data"));
-        if (map.get("data")!=null){
+        if (map.get("data") != null) {
             int length = text.length();
-            StringBuilder x= new StringBuilder();
-            for(int i=0;i<length;i++){
+            StringBuilder x = new StringBuilder();
+            for (int i = 0; i < length; i++) {
                 x.append("*");
             }
             System.err.println();
-            text=x.toString();
+            text = x.toString();
             message1.setMessage(x.toString());
-        }else {
+        } else {
             message1.setMessage(text);
         }
         UserService bean = applicationContext.getBean(UserService.class);
-        QueryWrapper<User> qw=new QueryWrapper<>();
-        qw.eq("username",username);
+        QueryWrapper<User> qw = new QueryWrapper<>();
+        qw.eq("username", username);
         User one = bean.getOne(qw);
         message1.setFrom_uid(one.getUid());
-        QueryWrapper<User> qw1=new QueryWrapper<>();
-        qw1.eq("username",toUsername);
+        QueryWrapper<User> qw1 = new QueryWrapper<>();
+        qw1.eq("username", toUsername);
         User one1 = bean.getOne(qw1);
         message1.setTo_uid(one1.getUid());
         MessageService bean1 = applicationContext.getBean(MessageService.class);
@@ -125,8 +127,8 @@ public class WebAdminSocketServer {
             this.sendMessage(jsonObject.toString(), toSession);
             log.info("发送给用户username={}，消息：{}", toUsername, jsonObject.toString());
         } else {
-            jsonObject.set("text",false);
-            this.sendMessage(jsonObject.toString(),session);
+            jsonObject.set("text", false);
+            this.sendMessage(jsonObject.toString(), session);
             log.info("发送失败，未找到用户username={}的session", toUsername);
         }
     }
@@ -165,9 +167,6 @@ public class WebAdminSocketServer {
             log.error("服务端发送消息给客户端失败", e);
         }
     }
-
-
-
 
 
 }

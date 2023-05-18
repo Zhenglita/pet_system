@@ -15,7 +15,7 @@ public class OrderBooks {
     @TableField(exist = false)
     private List<OrderBooks> orderBooks;
     @TableField(exist = false)
-    private  Integer price;
+    private Integer price;
     @TableField(exist = false)
     private String bookname;
     @TableField(exist = false)

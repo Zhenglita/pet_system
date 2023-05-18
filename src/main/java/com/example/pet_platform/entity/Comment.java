@@ -21,7 +21,7 @@ public class Comment {
     private Integer foregin_id;
     private Integer pid;
     private String target;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createtime;
     @TableField(exist = false)
     private List<Comment> children;
