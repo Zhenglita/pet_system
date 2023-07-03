@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
 @Data
 public class Message {
     private Integer id;
@@ -18,7 +19,7 @@ public class Message {
     private String message;
     private Boolean enable;
     private Integer connect;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createtime;
     @TableField(exist = false)
     private String imageUrl;

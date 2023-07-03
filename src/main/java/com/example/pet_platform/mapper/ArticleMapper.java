@@ -11,6 +11,8 @@ import java.util.List;
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
     List<Article> findAllByUserId(@Param("userId") Integer userId);
-    List<Article> findAllByAbleAndUserId(@Param("enable") Boolean enable,@Param("userId")Integer userId);
+
+    List<Article> findAllByAbleAndUserId(@Param("enable") Boolean enable, @Param("userId") Integer userId);
+
     List<Article> findAllByAble(@Param("enable") Boolean enable);
 }

@@ -12,8 +12,8 @@ public class Cart {
     private Integer id;
     private Integer books_id;
     private Integer user_id;
-    private  Integer num;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    private Integer num;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date time;
     @TableField(exist = false)
     private String bookname;

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.pet_platform.controller.DTO.UserDTO;
+import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.controller.util.TokenUtils;
 import com.example.pet_platform.mapper.UserMapper;
 import com.example.pet_platform.entity.User;
@@ -30,6 +31,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserMapper userMapper;
 
+
+    @Override
+    public R saveOwn(User user) {
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(true, User::getUsername, user.getUsername());
+        List<User> list = userMapper.selectList(lqw);
+        if (list.size() > 0) {
+            return new R(false);
+        } else {
+            user.setAvatar("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png");
+            return new R(true, userMapper.insert(user));
+        }
+    }
+
+    @Override
+    public R getChangeUser(Integer uid) {
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(true, User::getUid, uid);
+        User one = userMapper.selectOne(lambdaQueryWrapper);
+        return new R(true, one.getRole());
+    }
 
     @Override
     public UserDTO login(UserDTO userDTO) {

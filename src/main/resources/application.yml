@@ -2,15 +2,14 @@ server:
   port: 8083
 spring:
   redis:
-    database: 0
+    database: 1
     host: 127.0.0.1
-    jedis:
+    lettuce:
       pool:
-        max-idle: 8
-        max-wait: -1
-        min-idle: 0
-      timeout: 5000
-    password: ''
+        max-active: 10
+        max-idle: 10
+        min-idle: 1
+        time-between-eviction-runs: 10s
     port: 6379
   servlet:
     multipart:
@@ -20,17 +19,17 @@ spring:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://121.41.29.154:3306/pet_platform?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-      username: root
+      username: pet_platform
       password: 123456
 mybatis-plus:
   global-config:
     db-config:
       table-prefix: pet_
-#      使用数据库的自增方法
+      #      使用数据库的自增方法
       id-type: auto
-#      mybatis-plus的日志
+  #      mybatis-plus的日志
   configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: false
 files:
   upload:

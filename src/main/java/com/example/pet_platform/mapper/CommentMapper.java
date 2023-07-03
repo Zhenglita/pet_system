@@ -11,5 +11,6 @@ import java.util.List;
 @Mapper
 public interface CommentMapper extends BaseMapper<Comment> {
     List<Comment> findAllByForeginId(@Param("foreginId") Integer foreginId);
+
     List<Comment> findAllByUserId(@Param("UserId") Integer userId);
 }

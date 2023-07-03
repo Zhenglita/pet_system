@@ -15,7 +15,7 @@ public class Order {
     private String name;
     private Integer user_id;
     private String state;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private String time;
     private String pay_time;
     private String alipay_no;

@@ -15,17 +15,18 @@ import javax.annotation.Resource;
 public class UploadController {
     @Resource
     private QiniuUtils qiniuUtils;
+
     @PostMapping
-    public String upload(@RequestParam MultipartFile file){
+    public String upload(@RequestParam MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         //唯一的文件名称 使用UUID
-        String fileName =  UUID.randomUUID().toString()+"." + StringUtils.substringAfterLast(originalFilename,".");
+        String fileName = UUID.randomUUID().toString() + "." + StringUtils.substringAfterLast(originalFilename, ".");
         //上传文件 长传到哪呢？ 七牛云
         boolean upload = qiniuUtils.upload(file, fileName);
-        if(upload){
-            return QiniuUtils.url  + fileName;
+        if (upload) {
+            return QiniuUtils.url + fileName;
         }
-        return"上传失败";
+        return "上传失败";
 
     }
 }

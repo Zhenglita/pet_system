@@ -18,13 +18,13 @@ public class Article {
     private Integer aid;
     private String image;
     private String author;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date date;
     private String title;
     private String message;
-    private String  agree;
-    private String  type;
-    private Integer  comment;
+    private String agree;
+    private String type;
+    private Integer comment;
     private Integer uid;
     private Boolean enable;
     private Integer enable_uid;
