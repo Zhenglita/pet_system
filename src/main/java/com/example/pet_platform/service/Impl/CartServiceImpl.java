@@ -2,15 +2,18 @@ package com.example.pet_platform.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.pet_platform.controller.VO.VoucherVO;
 import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.entity.Books;
 import com.example.pet_platform.entity.Cart;
 import com.example.pet_platform.mapper.BooksMapper;
 import com.example.pet_platform.mapper.CartMapper;
 import com.example.pet_platform.service.CartService;
+import com.example.pet_platform.service.VoucherService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.util.List;
 
 @Service
@@ -19,6 +22,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper,Cart> implements Car
     private CartMapper cartMapper;
     @Resource
     private BooksMapper booksMapper;
+    @Resource
+    private VoucherService voucherService;
     @Override
     public int add(Cart cart) {
         LambdaQueryWrapper<Books> lqw = new LambdaQueryWrapper<>();
@@ -31,7 +36,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper,Cart> implements Car
     }
 
     @Override
-    public R getStates(Integer booksid,  Integer uid) {
+    public R getStates(Integer booksid,  Integer uid) throws ParseException {
         LambdaQueryWrapper<Books> lqw_book = new LambdaQueryWrapper<>();
         lqw_book.eq(true, Books::getId, booksid);
         Books book =booksMapper.selectOne(lqw_book);
@@ -40,7 +45,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper,Cart> implements Car
         lqw.eq(true, Cart::getUser_id, uid);
         Cart one =cartMapper.selectOne(lqw);
         if (one != null) {
-            return new R(false, book, one.getNum());
+            List<VoucherVO> skillVoucher = voucherService.getSkillVoucher(booksid);
+            return new R(false, book, one.getNum(),skillVoucher);
         } else
             return new R(true, book);
     }

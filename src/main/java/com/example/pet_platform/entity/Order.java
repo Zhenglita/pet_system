@@ -19,6 +19,7 @@ public class Order {
     private String time;
     private String pay_time;
     private String alipay_no;
+    private Boolean pay_state;
     private String place;
     private Boolean enable;
     @TableField(exist = false)

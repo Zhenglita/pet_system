@@ -70,6 +70,7 @@ public class AlipayController {
                 Order one = orderService.getOne(lambdaQueryWrapper);
                 one.setAlipay_no(params.get("trade_no"));
                 one.setPay_time(params.get("gmt_payment"));
+                one.setPay_state(true);
                 orderService.updateById(one);
 
             }

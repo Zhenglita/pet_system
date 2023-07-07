@@ -14,6 +14,7 @@ import com.example.pet_platform.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class CartController {
     private CartService cartService;
 
     @GetMapping("/s/{booksid}/{uid}")
-    private R getStates(@PathVariable Integer booksid, @PathVariable Integer uid) {
+    private R getStates(@PathVariable Integer booksid, @PathVariable Integer uid) throws ParseException {
 
             return cartService.getStates(booksid,uid);
     }

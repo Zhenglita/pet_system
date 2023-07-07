@@ -26,6 +26,12 @@ public class R {
         this.data=data;
         this.num=num;
     }
+    public  R(Boolean flag,Object data,Integer num,Object things){
+        this.flag=flag;
+        this.data=data;
+        this.num=num;
+        this.things=things;
+    }
     public  R(Boolean flag,Object data,Object things){
         this.flag=flag;
         this.data=data;

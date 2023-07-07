@@ -183,7 +183,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (size == null) {
             if (list.size() > 10) {
                 List<Comment> articles = list.subList(0, 10);
-                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                try {
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 map.put("list", articles);
                 return map;
             } else {
@@ -214,14 +218,23 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     comment.setArticleUrl(one.getImage());
                     articles.add(comment);
                 }
-                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                try {
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
                 map.put("list", articles);
                 return map;
             }
         } else {
             if (list.size() > size) {
                 List<Comment> articles = list.subList(0, size);
-                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                try {
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                }catch (Exception e){
+                 e.printStackTrace();
+                }
                 map.put("list", articles);
                 return map;
             } else {
@@ -251,7 +264,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     comment.setArticlename(one.getTitle());
                     articles.add(comment);
                 }
-                stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                try {
+                    stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(articles), 30, TimeUnit.MINUTES);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 map.put("list", articles);
                 return map;
             }

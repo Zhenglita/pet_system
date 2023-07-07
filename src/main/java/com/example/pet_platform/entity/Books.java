@@ -24,6 +24,7 @@ public class Books {
     private Integer quantity;
     private Integer uid;
     private Boolean enable;
+    private Boolean voucher_enable;
     @TableField(exist = false)
     private Integer oid;
     @TableField(exist = false)

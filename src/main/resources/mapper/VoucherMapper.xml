@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.pet_platform.mapper.VoucherMapper">
+   <insert id="saveSkill" parameterType="com.example.pet_platform.entity.Voucher" useGeneratedKeys = "true" keyProperty = "id">
+      insert into pet_voucher(title,book_id,rules,pay_value,actual_value,type,create_time,update_time)
+      values(#{title},#{book_id},#{rules},#{pay_value},#{actual_value},#{type},now(),now())
+   </insert>
+   <select id="getAllVoucher" parameterType="java.lang.Integer" resultType="com.example.pet_platform.controller.VO.VoucherVO">
+      select *from pet_voucher v left join pet_seckill_voucher  k on v.id=k.voucher_id where v.book_id=#{book_id}
+   </select>
+   <insert id="saveVoucher" parameterType="com.example.pet_platform.controller.DTO.SecKillVoucherDTO" >
+      insert into pet_user_voucher(user_id,voucher_id,type,num)
+      values(#{user_id},#{id},#{type},#{num})
+   </insert>
+   <select id="getUserVoucher" parameterType="com.example.pet_platform.controller.DTO.SecKillVoucherDTO" resultType="com.example.pet_platform.entity.UserVoucher">
+      select *from pet_user_voucher  where user_id=#{user_id}
+                                       and voucher_id=#{id}
+   </select>
+   <update id="updatNum" parameterType="com.example.pet_platform.controller.DTO.SecKillVoucherDTO" >
+      UPDATE pet_user_voucher
+      SET num = #{num}
+      WHERE voucher_id = #{id}
+   </update>
+   <select id="selectAllById"  resultType="com.example.pet_platform.controller.DTO.SecKillVoucherDTO">
+      select *from pet_voucher v left join pet_seckill_voucher s on v.id=s.voucher_id where  id=#{id}
+   </select>
+   <select id="selectAllByUserId"  resultType="com.example.pet_platform.controller.DTO.SecKillVoucherDTO">
+      SELECT *FROM pet_voucher v Right JOIN(
+         SELECT * from pet_user_voucher WHERE user_id=#{user_id}) u ON v.id=u.voucher_id
+   </select>
+</mapper>

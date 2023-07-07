@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.pet_platform.controller.DTO.SecKillVoucherDTO;
 import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.controller.util.TokenUtils;
 import com.example.pet_platform.entity.*;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Array;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +46,10 @@ public class OrderController {
     private R add(@RequestBody Order order, HttpServletRequest request) {
        return orderService.add(order,request);
     }
-
+    @GetMapping("/voucher/{id}")
+    private R addVoucher(@PathVariable Integer id, HttpServletRequest request) throws ParseException {
+        return orderService.addVoucher(id,request);
+    }
     @GetMapping("/{uid}")
     private R getAll(@PathVariable Integer uid) {
        return orderService.getAll(uid);
