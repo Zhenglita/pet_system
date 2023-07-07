@@ -20,6 +20,8 @@ import com.example.pet_platform.mapper.FollowMapper;
 import com.example.pet_platform.mapper.UserMapper;
 import com.example.pet_platform.service.FollowService;
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,12 +37,11 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     private UserMapper userMapper;
     @Resource
     private ArticleMapper articleMapper;
-
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Override
     public R add(Integer uid, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Follow> qw = new QueryWrapper<>();
         qw.eq("b_uid", uid);
         qw.eq("f_uid", Integer.parseInt(userid));
@@ -58,9 +59,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
 
     @Override
     public R getAll(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Follow> qw = new QueryWrapper<>();
         qw.eq("f_uid", Integer.parseInt(userid));
         List<Follow> list =followMapper.selectList(qw);

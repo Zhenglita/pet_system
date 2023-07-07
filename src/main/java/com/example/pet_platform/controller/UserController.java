@@ -74,7 +74,7 @@ public class UserController {
         UserDTO dto = userService.admin_login(userDTO);
         if (dto.getToken() != null) {
             String jsonString = JSONObject.toJSONString(dto);
-            return new R(true, jsonString, userDTO.getToken());
+            return new R(true, jsonString, dto.getToken());
         } else {
             return new R(false);
         }
@@ -87,7 +87,7 @@ public class UserController {
         if (dto.getToken() != null) {
             String jsonString = JSONObject.toJSONString(dto);
 //            System.err.println(jsonString);
-            return new R(true, jsonString, userDTO.getToken());
+            return new R(true, jsonString, dto.getToken());
         } else {
             return new R(false);
         }

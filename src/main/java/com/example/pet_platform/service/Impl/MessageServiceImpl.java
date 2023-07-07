@@ -1,8 +1,10 @@
 package com.example.pet_platform.service.Impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.pet_platform.controller.DTO.UserDTO;
 import com.example.pet_platform.controller.util.R;
 import com.example.pet_platform.entity.Comment;
 import com.example.pet_platform.entity.Message;
@@ -11,6 +13,8 @@ import com.example.pet_platform.mapper.MessageMapper;
 import com.example.pet_platform.mapper.UserMapper;
 import com.example.pet_platform.service.MessageService;
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -18,6 +22,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> implements MessageService {
@@ -25,12 +30,12 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     private MessageMapper messageMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public R getAll(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Message> qw = new QueryWrapper<>();
         qw.eq("to_uid", Integer.parseInt(userid));
         qw.eq("enable", false);
@@ -41,9 +46,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public R delAll(HttpServletRequest request, String username) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Message> qw = new QueryWrapper<>();
         qw.eq("from_uid", Integer.parseInt(userid));
         qw.eq("toUsername", username);
@@ -54,9 +57,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public R addAll(HttpServletRequest request, String username) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("uid", Integer.parseInt(userid));
         User one = userMapper.selectOne(qw);
@@ -78,9 +79,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public R addAll(HttpServletRequest request, Comment comment) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("uid", Integer.parseInt(userid));
         User one = userMapper.selectOne(qw);
@@ -98,9 +97,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public R addAll(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Message> qw = new QueryWrapper<>();
         qw.eq("to_uid", Integer.parseInt(userid));
         qw.eq("enable", true);
@@ -116,9 +113,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
             //执行耗时的逻辑
             try {
                 //休眠n秒钟进行模拟业务代码.
-                String token = request.getHeader("Authorization");
-                DecodedJWT verify = JWTUtils.verify(token);
-                String userid = verify.getClaim("userid").asString();
+                String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
                 QueryWrapper<Message> qw = new QueryWrapper<>();
                 qw.eq("enable", false);
                 qw.eq("connect", 1);
@@ -151,9 +146,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public R addRole(HttpServletRequest request, String messages) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<Message> qw1 = new QueryWrapper<>();
         qw1.isNull("toUsername").isNull("to_uid");
         qw1.eq("enable", true);

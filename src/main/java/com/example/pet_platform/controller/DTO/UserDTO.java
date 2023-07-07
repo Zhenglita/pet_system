@@ -10,7 +10,7 @@ import java.util.List;
  */
 @Data
 public class UserDTO {
-    private Integer uid;
+    private String uid;
     private String username;
     private String password;
     private String sex;

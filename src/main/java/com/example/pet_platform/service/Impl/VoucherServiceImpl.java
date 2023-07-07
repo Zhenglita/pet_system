@@ -14,6 +14,8 @@ import com.example.pet_platform.service.BooksService;
 import com.example.pet_platform.service.SeckillVoucherService;
 import com.example.pet_platform.service.VoucherService;
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,8 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
     private VoucherMapper voucherMapper;
     @Resource
     private BooksService booksService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Transactional
     @Override
     public Boolean saveSeckill(SecKillVoucherDTO secKillVoucherDTO) throws ParseException {
@@ -82,9 +86,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
     @Override
     public List<SecKillVoucherDTO> getUserVoucher(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         List<SecKillVoucherDTO> secKillVoucherDTOS = voucherMapper.selectAllByUserId(Integer.parseInt(userid));
         ZoneId timeZone = ZoneId.systemDefault();
         for (SecKillVoucherDTO secKillVoucherDTO:secKillVoucherDTOS){

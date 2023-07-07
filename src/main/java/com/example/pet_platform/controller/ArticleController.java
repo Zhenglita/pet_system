@@ -16,6 +16,7 @@ import com.example.pet_platform.mapper.CommentMapper;
 import com.example.pet_platform.service.*;
 
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,8 @@ public class ArticleController {
     private ArticleService articleService;
     @Resource
     private UserService userService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     //    获取所有文章
     @GetMapping
@@ -80,9 +83,7 @@ public class ArticleController {
     //    保存上传文章
     @PostMapping
     public R save(@RequestBody Article article, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("uid", Integer.parseInt(userid));
         User one = userService.getOne(qw);

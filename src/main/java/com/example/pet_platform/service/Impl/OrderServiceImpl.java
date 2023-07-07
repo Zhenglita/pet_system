@@ -15,6 +15,7 @@ import com.example.pet_platform.service.OrderService;
 import com.example.pet_platform.service.SeckillVoucherService;
 import com.example.pet_platform.service.VoucherService;
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
 import com.example.pet_platform.util.SimpleRedisLock;
 import com.sun.org.apache.xpath.internal.operations.Or;
 import org.springframework.aop.framework.AopContext;
@@ -44,8 +45,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Resource
     private SeckillVoucherService seckillVoucherService;
     @Resource
-    private SeckillVoucherMapper seckillVoucherMapper;
-    @Resource
     private VoucherMapper voucherMapper;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -72,9 +71,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public R add(Order order, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid", Integer.parseInt(userid));
         User one = userMapper.selectOne(queryWrapper);
@@ -110,27 +107,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public R addVoucher(Integer id, HttpServletRequest request)  {
         SecKillVoucherDTO secKillVoucherDTO = voucherMapper.selectAllById(id);
         if (secKillVoucherDTO.getType().equals(true)){
-//            if (secKillVoucherDTO.getBegin_time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isAfter((LocalDateTime.now()))){
-//                return new R(false,"秒杀尚未开始");
-//            }
-//            if (secKillVoucherDTO.getEnd_time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isAfter((LocalDateTime.now()))){
-//                return new R(false,"秒杀已经结束了");
-//            }
+            ZoneId timeZone = ZoneId.systemDefault();
+            LocalDateTime begin = secKillVoucherDTO.getBegin_time().toInstant().atZone(timeZone).toLocalDateTime();
+            LocalDateTime end = secKillVoucherDTO.getEnd_time().toInstant().atZone(timeZone).toLocalDateTime();
+            if (begin.isAfter(LocalDateTime.now())){
+                return new R(false,"秒杀尚未开始");
+            }
+            if (end.isBefore((LocalDateTime.now()))){
+                return new R(false,"秒杀已经结束了");
+            }
             if(secKillVoucherDTO.getStock()<=0){
-                return new R(false,"库存不足");
+                return new R(false,"该物品已经抢购完了");
             }
         }
         //秒杀券  先判断是否为秒杀请求-> 秒杀券库存>0->该用户是否购买过该券
         if(secKillVoucherDTO.getType().equals(true)&&secKillVoucherDTO.getStock()>0){
-            String token = request.getHeader("Authorization");
-            DecodedJWT verify = JWTUtils.verify(token);
-            String userid = verify.getClaim("userid").asString();
+            String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
             secKillVoucherDTO.setUser_id(Integer.parseInt(userid));
             SimpleRedisLock lock = new SimpleRedisLock("order:" + userid, stringRedisTemplate);
             boolean isLock = lock.tryLock(1200);
             if (!isLock){
                 //获取锁失败
-                return new R(false);
+                return new R(false,"太火爆了，请稍后再试");
             }
             try{
                 OrderService proxy=(OrderService) AopContext.currentProxy();
@@ -143,6 +141,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         else if (secKillVoucherDTO.getType().equals(false)){
             Date date = new Date();
             Order order =new Order();
+//            String token = request.getHeader("Authorization");
+//            DecodedJWT verify = JWTUtils.verify(token);
+//            String userid = verify.getClaim("userid").asString();
+//            secKillVoucherDTO.setUser_id(Integer.parseInt(userid));
             UserVoucher userVoucher = voucherMapper.getUserVoucher(secKillVoucherDTO);
             if (userVoucher==null){
                 secKillVoucherDTO.setNum(1);
@@ -172,7 +174,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
         }
-        return new R(false);
+        return new R(false,"系统繁忙");
     }
     @Transactional
     public  R createKill(SecKillVoucherDTO secKillVoucherDTO){

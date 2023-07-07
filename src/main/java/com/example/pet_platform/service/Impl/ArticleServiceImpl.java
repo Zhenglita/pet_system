@@ -17,6 +17,7 @@ import com.example.pet_platform.service.FollowService;
 import com.example.pet_platform.service.MessageService;
 import com.example.pet_platform.service.UserService;
 import com.example.pet_platform.util.JWTUtils;
+import com.example.pet_platform.util.RedisGetUser;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -43,12 +44,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private CommentMapper commentMapper;
 
+
     @Override
     public Map<String, Object> getById(Integer id, HttpServletRequest request) {
         Article byId = articleMapper.selectById(id);
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         //判断是否关注与否
         QueryWrapper<Follow> qw = new QueryWrapper<>();
         qw.eq("b_uid", byId.getUid());
@@ -78,9 +78,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public int update(Article article, HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        DecodedJWT verify = JWTUtils.verify(token);
-        String userid = verify.getClaim("userid").asString();
+        String userid = RedisGetUser.getUserid(stringRedisTemplate,request);
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("uid", Integer.parseInt(userid));
         User one = userMapper.selectOne(qw);

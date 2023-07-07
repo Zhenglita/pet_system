@@ -1,6 +1,7 @@
 package com.example.pet_platform.service.Impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,13 +18,13 @@ import com.example.pet_platform.util.JWTUtils;
 import io.netty.util.internal.StringUtil;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -31,7 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserMapper userMapper;
 
-
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @Override
     public R saveOwn(User user) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<>();
@@ -61,16 +63,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User one = getOne(qw);
 //        User one = getOne(qw);
         if (one!=null){
-            String jsonString = JSONObject.toJSONString(one);
-            System.err.println(jsonString);
-            BeanUtil.copyProperties(one, userDTO, true);//将查到的值传给userDTO，即本来userdto只有账号密码，现在user的内容它都有
+            UserDTO resultUser = BeanUtil.copyProperties(one, UserDTO.class);
             // 设置token
-            String token = JWTUtils.getToken(one.getUid().toString(), one.getUsername());
-            userDTO.setToken(token);
+            String token = UUID.randomUUID().toString(true);
+//            JWTUtils.getToken(one.getUid().toString(), one.getUsername());
+            resultUser.setToken(token);
             if (StringUtils.isEmpty(one.getPlace())){
-                userDTO.setPlace("");
+                resultUser.setPlace("");
             }
-            return userDTO;
+            String tokenKey="login:user:"+token;
+            Map<String, Object> userMap = BeanUtil.beanToMap(resultUser);
+            stringRedisTemplate.opsForHash().putAll(tokenKey,userMap);
+            stringRedisTemplate.expire(tokenKey,30, TimeUnit.MINUTES);
+            return resultUser;
         }else{
             return userDTO;
         }
@@ -85,13 +90,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         qw.eq("password",userDTO.getPassword());
         User one = getOne(qw);
         if (one!=null&& Objects.equals(one.getRole(), "ROLE_ADMIN")){
-            String jsonString = JSONObject.toJSONString(one);
-            System.err.println(jsonString);
-            BeanUtil.copyProperties(one, userDTO, true);//将查到的值传给userDTO，即本来userdto只有账号密码，现在user的内容它都有
+            UserDTO resultUser = BeanUtil.copyProperties(one, UserDTO.class);//将查到的值传给userDTO，即本来userdto只有账号密码，现在user的内容它都有
             // 设置token
-            String token = JWTUtils.getToken(one.getUid().toString(), one.getUsername());
-            userDTO.setToken(token);
-            return userDTO;
+            String token = UUID.randomUUID().toString(true);
+            resultUser.setToken(token);
+            String tokenKey="login:user:"+token;
+            Map<String, Object> userMap = BeanUtil.beanToMap(resultUser);
+            stringRedisTemplate.opsForHash().putAll(tokenKey,userMap);
+            stringRedisTemplate.expire(tokenKey,30, TimeUnit.MINUTES);
+            return resultUser;
         }else{
             return userDTO;
         }
