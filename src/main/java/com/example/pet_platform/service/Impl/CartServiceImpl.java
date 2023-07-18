@@ -44,11 +44,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper,Cart> implements Car
         lqw.eq(true, Cart::getBooks_id, booksid);
         lqw.eq(true, Cart::getUser_id, uid);
         Cart one =cartMapper.selectOne(lqw);
+        List<VoucherVO> skillVoucher = voucherService.getSkillVoucher(booksid);
         if (one != null) {
-            List<VoucherVO> skillVoucher = voucherService.getSkillVoucher(booksid);
             return new R(false, book, one.getNum(),skillVoucher);
         } else
-            return new R(true, book);
+            return new R(true, book,skillVoucher);
     }
 
     @Override

@@ -17,9 +17,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new JwtInterceptor(stringRedisTemplate))
-                .excludePathPatterns("/users","/users/admin/login");
+                .excludePathPatterns("/users/**","/articles/**","/comments/**","/books/**","/alipay/**","/upload");
 //                .addPathPatterns("/**")  // 拦截所有请求，通过判断token是否合法来决定是否需要登录
-//                .excludePathPatterns("/users/**","/article/**","/articles/**","/alipay/**","/imserver/**","/messages/**","/upload/**");  // 放行静态文件
+//                .excludePathPatterns("/users/**",,"/articles/**","/alipay/**","/imserver/**",);  // 放行静态文件
     }
 
 //    @Bean
